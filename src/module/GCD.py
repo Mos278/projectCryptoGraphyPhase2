@@ -8,8 +8,8 @@ def findGCD(first, second):
     return a
 
 
-def isCoprime(first, second):
-    return findGCD(first, second) == 1
+def isCoprime(base, mod):
+    return findGCD(base, mod) == 1
 
 
 def findInverse(a, p):

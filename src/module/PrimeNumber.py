@@ -39,20 +39,22 @@ def isPrime(number):
 
 
 def findSafePrime(number, bit):
-    maxLength = Exponentiation.fastExpo(2, bit) - 1
-    ran = convertToOdd(random.randint(1, number - 1), maxLength)
+    max_length = Exponentiation.fastExpo(2, bit) - 1
+    min_length = Exponentiation.fastExpo(2, (bit - 1))
+    ran = convertToOdd(number, max_length)
 
     while True:
         if isPrime(ran) != STATE_PRIME.PRIME:
             ran += 2
-            if ran >= maxLength:
-                ran = convertToOdd(random.randint(1, number - 1), maxLength)
+            if ran >= max_length:
+                ran = convertToOdd(random.randint(min_length, max_length - 1), max_length)
             continue
 
         if not isSavePrime(ran):
+            print(f"{ran} is not safe Prime")
             ran += 2
-            if ran >= maxLength:
-                ran = convertToOdd(random.randint(1, number - 1), maxLength)
+            if ran >= max_length:
+                ran = convertToOdd(random.randint(min_length, max_length - 1), max_length)
             continue
 
         print(f"Safe Prime Found: {ran}")
@@ -81,6 +83,6 @@ def findMaxPrimeBeforeOverflow():
 
 
 def isSavePrime(p):
-    if isPrime((p - 1) / 2) == STATE_PRIME:
+    if isPrime((p - 1) // 2) == STATE_PRIME.PRIME:
         return True
     return False

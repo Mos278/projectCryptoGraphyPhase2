@@ -9,7 +9,7 @@ import random
 
 def gen_prime(bit, file_name):
     print("Reading file...")
-    temp_result = FileInput.random_n_bit_from_file(bit, file_name)
+    temp_result = FileInput.randomNBitFromFile(bit, file_name)
 
     forward = True
     max_value = (Exponentiation.fastExpo(2, bit) - 1)
@@ -65,7 +65,7 @@ def convertToOdd(temp_result, max_value):
 def ElgamalKeyGen(p):
     if PrimeNumber.isSavePrime(p):
         u = random.randint(1, p - 1)
-        g = Generator.find_generator(p)
+        g = Generator.findGenerator(p)
 
 
 def main():
