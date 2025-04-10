@@ -1,5 +1,5 @@
 import os
-from . import ConvertTypeData
+from . import ConvertDataType
 
 
 class TYPE_READ:
@@ -63,6 +63,6 @@ def readBinaryFromFile(input_file_name):
         data = file.read()  # อ่านข้อมูลในรูปแบบไบต์
 
     # ไม่ทำการแปลงเป็น binary string แต่ให้เก็บข้อมูลเป็น byte ที่อ่านมา
-    binary_data = ConvertTypeData.bytesToBinary(data) # เก็บข้อมูลในรูปแบบ byte
+    binary_data = ConvertDataType.bytesToBinary(data) # เก็บข้อมูลในรูปแบบ byte
     print(f"read file -> binary Data: {binary_data}\nlength: {len(binary_data)}")  # แสดงข้อมูลในรูปแบบ byte
     return binary_data  # คืนค่าเป็น byte string
