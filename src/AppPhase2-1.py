@@ -6,7 +6,7 @@ from module import PrimeNumber
 from module import FileInput
 from module import Generator
 from module import FileOutput
-from module import ConvertTypeData
+from module import ConvertDataType
 from model import ElgamalKey
 
 import random
@@ -23,19 +23,6 @@ def genSafePrime(bit_size, file_name):
     return result
 
 
-def genInverseByRandomNumber(n):
-    e = random.randint(1, n - 1)
-
-    while GCD.findGCD(e, n) != 1:
-        e += 1
-        if e >= n:
-            e = 1
-
-    inverse = GCD.findInverse(e, n)
-
-    return [e, inverse, n]
-
-
 def ElgamalKeyGen(bit_size, random_file):
     p = genSafePrime(bit_size, random_file)
     g = Generator.findGenerator(p)
@@ -47,15 +34,16 @@ def ElgamalKeyGen(bit_size, random_file):
 
 
 def ElgamalEncrypt(p, g, y, binary_file):
-    block_size = len(ConvertTypeData.intToBinary(p))  #กำหนด p เป็น block_size
-
+    block_size = len(ConvertDataType.intToBinary(p))  #กำหนด p เป็น block_size
+    message_size = block_size - 1
     # เก็บ ciphertext ในรูปของ list
+
     ciphertext = ""
 
     # ทำการเข้ารหัสแต่ละข้อความ
-    for i in range(0, len(binary_file), block_size):  # แยกทุก block_size บิต
+    for i in range(0, len(binary_file), message_size):  # แยกทุก read_size บิต
         # แปลง binary string เป็น integer
-        bit = binary_file[i:i + block_size]
+        bit = binary_file[i:i + message_size]
         print(f"{bit} length = {len(bit)}")
         message = int(bit, 2)
 
@@ -66,17 +54,17 @@ def ElgamalEncrypt(p, g, y, binary_file):
 
         # คำนวณค่า a
         a = Exponentiation.fastExpoWithModulo(base=g, expo=k, mod=p)
-        print(f"A before padding: {a} : {ConvertTypeData.intToBinary(a)} ")
-        a = paddingBit(ConvertTypeData.intToBinary(a), block_size)
-        print(f"A after padding: {ConvertTypeData.BinaryToInt(a)} : {a} ")
+        print(f"A before padding: {a} : {ConvertDataType.intToBinary(a)} ")
+        a = paddingBit(ConvertDataType.intToBinary(a), block_size)
+        print(f"A after padding: {ConvertDataType.BinaryToInt(a)} : {a} ")
 
         ciphertext += a
 
         # คำนวณ b
         b = (Exponentiation.fastExpoWithModulo(base=y, expo=k, mod=p) * message) % p
-        print(f"B before padding: {b} : {ConvertTypeData.intToBinary(b)} ")
-        b = paddingBit(ConvertTypeData.intToBinary(b), block_size)
-        print(f"B after padding: {ConvertTypeData.BinaryToInt(b)} : {b} ")
+        print(f"B before padding: {b} : {ConvertDataType.intToBinary(b)} ")
+        b = paddingBit(ConvertDataType.intToBinary(b), block_size)
+        print(f"B after padding: {ConvertDataType.BinaryToInt(b)} : {b} ")
 
         print("----------------------------------------")
         ciphertext += b
@@ -85,39 +73,52 @@ def ElgamalEncrypt(p, g, y, binary_file):
     return ciphertext  # คืนค่า ciphertext ที่ได้
 
 
-def paddingBit(bit, block_size):
-    while len(bit) < block_size:
-        bit = '0' + bit
-    return bit
-
-
-def removePadding(bit, block_size):
-    return bit[len(bit) % block_size:]
-
-
 def elgamalDecrypt(u, p, binary_cipher_text):
-    block_size = len(ConvertTypeData.intToBinary(p))  # กำหนดขนาดของ block
+    block_size = len(ConvertDataType.intToBinary(p))  # กำหนดขนาดของ block
+    message_size = block_size - 1
     cipher_size = block_size * 2
+    before_last_block = len(binary_cipher_text) - cipher_size
     message = ""  # ตัวแปรที่เก็บข้อความที่ถอดรหัสแล้ว
 
-    for i in range(0, len(binary_cipher_text), cipher_size):  # แยกทุก block_size บิต
+    for i in range(0, before_last_block, cipher_size):  # แยกทุก block_size บิต
         bit = binary_cipher_text[i:i + cipher_size]
         a = bit[:block_size]  # แยกส่วนของ a
         b = bit[block_size:]  # แยกส่วนของ b
 
-        a = ConvertTypeData.BinaryToInt(a)
-        b = ConvertTypeData.BinaryToInt(b)
-        print(f"A : {a} : {ConvertTypeData.intToBinary(a)} ")
-        print(f"B : {b} : {ConvertTypeData.intToBinary(b)} ")
+        a = ConvertDataType.BinaryToInt(a)
+        b = ConvertDataType.BinaryToInt(b)
+        print(f"A : {a} : {ConvertDataType.intToBinary(a)} ")
+        print(f"B : {b} : {ConvertDataType.intToBinary(b)} ")
 
         s = Exponentiation.fastExpoWithModulo(a, u, p)
         temp_message = (b * GCD.findInverse(s, p)) % p
         # temp_message = b * (Exponentiation.fastExpoWithModulo(base=a, expo=(p-1-u),mod= p))
-        temp_message = ConvertTypeData.intToBinary(temp_message)
+        temp_message = ConvertDataType.intToBinary(temp_message)
+        temp_message = paddingBit(temp_message, message_size)
         # temp_message = paddingBit(bit=temp_message, block_size=block_size)
         # padding_message = paddingBit(bit=temp_message, block_size=block_size)
         print(f"message: {temp_message}")
         message += temp_message
+
+    bit = binary_cipher_text[before_last_block:]
+    a = bit[:block_size]  # แยกส่วนของ a
+    b = bit[block_size:]  # แยกส่วนของ b
+
+    a = ConvertDataType.BinaryToInt(a)
+    b = ConvertDataType.BinaryToInt(b)
+    print(f"A : {a} : {ConvertDataType.intToBinary(a)} ")
+    print(f"B : {b} : {ConvertDataType.intToBinary(b)} ")
+
+    s = Exponentiation.fastExpoWithModulo(a, u, p)
+    temp_message = (b * GCD.findInverse(s, p)) % p
+    # temp_message = b * (Exponentiation.fastExpoWithModulo(base=a, expo=(p-1-u),mod= p))
+    temp_message = ConvertDataType.intToBinary(temp_message)
+    missingBits = 8 - ((len(message) + len(temp_message)) % 8)
+    temp_message = paddingToSize(temp_message, missingBits)
+    # temp_message = paddingBit(bit=temp_message, block_size=block_size)
+    # padding_message = paddingBit(bit=temp_message, block_size=block_size)
+    print(f"message: {temp_message}")
+    message += temp_message
 
     print(f"Decrypt Success: {message} \nlength: {len(message)}")
     return message
@@ -131,7 +132,9 @@ def main():
     cipher_file_path = config['cipher_file']['path']
     output_file_path = config['output_file']['path']
 
-    binary_string = "0110100001100101011011000110110001101111001000000111011101101111011100100110110001100100"
+    paintext = "hello world"
+    print(f"message: {paintext}")
+    binary_string = ConvertDataType.strToBinary(paintext)
     #Set Up
     key = ElgamalKeyGen(bit_size=bit_size, random_file=random_file_path)
     print(f"binary: {binary_string}\nlength: {len(binary_string)}")
@@ -146,10 +149,27 @@ def main():
     # binary_cipher_text_read_from_file = removePadding(bit=binary_cipher_text_read_from_file, block_size=bit_size)
     # print(f"bit: {binary_cipher_text_read_from_file}\nlength: {len(binary_cipher_text_read_from_file)}")
     message = elgamalDecrypt(u=key.u, p=key.p, binary_cipher_text=cipher_text)
+    print(ConvertDataType.binaryToStr(message))
     # print("---------------------------------")
     # for item in message:
     #     print(item)
     # FileOutput.writeBlocksToFile(data=message, sp_bit_length=key.p, output_filename=config['output_file']['path'])
+
+
+def paddingBit(bit, block_size):
+    while len(bit) < block_size:
+        bit = '0' + bit
+    return bit
+
+
+def paddingToSize(bit, size):
+    for i in range(size):
+        bit = '0' + bit
+    return bit
+
+
+def removePadding(bit, block_size):
+    return bit[len(bit) % block_size:]
 
 
 if __name__ == "__main__":
