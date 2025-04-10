@@ -115,9 +115,9 @@ def elgamalDecrypt(u, p, binary_cipher_text):
         # temp_message = b * (Exponentiation.fastExpoWithModulo(base=a, expo=(p-1-u),mod= p))
         temp_message = ConvertTypeData.intToBinary(temp_message)
         # temp_message = paddingBit(bit=temp_message, block_size=block_size)
-        padding_message = paddingBit(bit=temp_message, block_size=block_size)
-        print(f"message: {padding_message}")
-        message += padding_message
+        # padding_message = paddingBit(bit=temp_message, block_size=block_size)
+        print(f"message: {temp_message}")
+        message += temp_message
 
     print(f"Decrypt Success: {message} \nlength: {len(message)}")
     return message
