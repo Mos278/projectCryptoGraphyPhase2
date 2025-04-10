@@ -34,15 +34,11 @@ def ElgamalKeyGen(bit_size, random_file):
 
 
 def ElgamalEncrypt(p, g, y, binary_file):
-    block_size = len(ConvertDataType.intToBinary(p))  #กำหนด p เป็น block_size
+    block_size = len(ConvertDataType.intToBinary(p))
     message_size = block_size - 1
-    # เก็บ ciphertext ในรูปของ list
-
     ciphertext = ""
 
-    # ทำการเข้ารหัสแต่ละข้อความ
-    for i in range(0, len(binary_file), message_size):  # แยกทุก read_size บิต
-        # แปลง binary string เป็น integer
+    for i in range(0, len(binary_file), message_size):  # แยกทุก message_size บิต
         bit = binary_file[i:i + message_size]
         print(f"{bit} length = {len(bit)}")
         message = int(bit, 2)
@@ -70,20 +66,20 @@ def ElgamalEncrypt(p, g, y, binary_file):
         ciphertext += b
 
     print(f"Encrypt Success: {ciphertext} \nlength: {len(ciphertext)}")
-    return ciphertext  # คืนค่า ciphertext ที่ได้
+    return ciphertext
 
 
 def elgamalDecrypt(u, p, binary_cipher_text):
-    block_size = len(ConvertDataType.intToBinary(p))  # กำหนดขนาดของ block
+    block_size = len(ConvertDataType.intToBinary(p))
     message_size = block_size - 1
     cipher_size = block_size * 2
     before_last_block = len(binary_cipher_text) - cipher_size
-    message = ""  # ตัวแปรที่เก็บข้อความที่ถอดรหัสแล้ว
+    message = ""
 
-    for i in range(0, before_last_block, cipher_size):  # แยกทุก block_size บิต
+    for i in range(0, before_last_block, cipher_size):
         bit = binary_cipher_text[i:i + cipher_size]
-        a = bit[:block_size]  # แยกส่วนของ a
-        b = bit[block_size:]  # แยกส่วนของ b
+        a = bit[:block_size]
+        b = bit[block_size:]
 
         a = ConvertDataType.BinaryToInt(a)
         b = ConvertDataType.BinaryToInt(b)
@@ -92,17 +88,14 @@ def elgamalDecrypt(u, p, binary_cipher_text):
 
         s = Exponentiation.fastExpoWithModulo(a, u, p)
         temp_message = (b * GCD.findInverse(s, p)) % p
-        # temp_message = b * (Exponentiation.fastExpoWithModulo(base=a, expo=(p-1-u),mod= p))
         temp_message = ConvertDataType.intToBinary(temp_message)
         temp_message = paddingBit(temp_message, message_size)
-        # temp_message = paddingBit(bit=temp_message, block_size=block_size)
-        # padding_message = paddingBit(bit=temp_message, block_size=block_size)
         print(f"message: {temp_message}")
         message += temp_message
 
     bit = binary_cipher_text[before_last_block:]
-    a = bit[:block_size]  # แยกส่วนของ a
-    b = bit[block_size:]  # แยกส่วนของ b
+    a = bit[:block_size]
+    b = bit[block_size:]
 
     a = ConvertDataType.BinaryToInt(a)
     b = ConvertDataType.BinaryToInt(b)
@@ -111,12 +104,10 @@ def elgamalDecrypt(u, p, binary_cipher_text):
 
     s = Exponentiation.fastExpoWithModulo(a, u, p)
     temp_message = (b * GCD.findInverse(s, p)) % p
-    # temp_message = b * (Exponentiation.fastExpoWithModulo(base=a, expo=(p-1-u),mod= p))
     temp_message = ConvertDataType.intToBinary(temp_message)
     missingBits = 8 - ((len(message) + len(temp_message)) % 8)
-    temp_message = paddingToSize(temp_message, missingBits)
-    # temp_message = paddingBit(bit=temp_message, block_size=block_size)
-    # padding_message = paddingBit(bit=temp_message, block_size=block_size)
+    if missingBits < 8:
+        temp_message = paddingToSize(temp_message, missingBits)
     print(f"message: {temp_message}")
     message += temp_message
 
@@ -125,35 +116,32 @@ def elgamalDecrypt(u, p, binary_cipher_text):
 
 
 def main():
-    # test()
     bit_size = int(config['config_elgamal']["bit_size"])
     random_file_path = config['random_file']['path']
     input_file_path = config['input_file']['path']
     cipher_file_path = config['cipher_file']['path']
     output_file_path = config['output_file']['path']
 
-    paintext = "hello world"
-    print(f"message: {paintext}")
-    binary_string = ConvertDataType.strToBinary(paintext)
     #Set Up
     key = ElgamalKeyGen(bit_size=bit_size, random_file=random_file_path)
-    print(f"binary: {binary_string}\nlength: {len(binary_string)}")
 
     #Encrypt
-    # binary_input_file = FileInput.readBinaryFromInFile(input_file_name=input_file_path)
-    cipher_text = ElgamalEncrypt(p=key.p, g=key.g, y=key.y, binary_file=binary_string)
-    # FileOutput.writeBinaryToFile(binary_data=cipher_text, output_file_name=cipher_file_path)
-    #
-    # #Decrypt
-    # binary_cipher_text_read_from_file = FileInput.readBinaryFromFile(input_file_name=cipher_file_path)
-    # binary_cipher_text_read_from_file = removePadding(bit=binary_cipher_text_read_from_file, block_size=bit_size)
-    # print(f"bit: {binary_cipher_text_read_from_file}\nlength: {len(binary_cipher_text_read_from_file)}")
-    message = elgamalDecrypt(u=key.u, p=key.p, binary_cipher_text=cipher_text)
-    print(ConvertDataType.binaryToStr(message))
-    # print("---------------------------------")
-    # for item in message:
-    #     print(item)
-    # FileOutput.writeBlocksToFile(data=message, sp_bit_length=key.p, output_filename=config['output_file']['path'])
+    binary_input_file = FileInput.readBinaryFromFile(input_file_name=input_file_path)
+    print(f"input length: {len(binary_input_file)}")
+    cipher_text = ElgamalEncrypt(p=key.p, g=key.g, y=key.y, binary_file=binary_input_file)
+    FileOutput.writeBinaryToFile(binary_data=cipher_text, output_file_path=cipher_file_path)
+
+    #pre-Decrypt
+    binary_cipher_text_read_from_file = FileInput.readBinaryFromFile(input_file_name=cipher_file_path)
+    print(f"binary from file cipher : {binary_cipher_text_read_from_file}")
+
+    # Byte conversion padding removal
+    binary_cipher_text_read_from_file = removePadding(bit=binary_cipher_text_read_from_file, block_size=bit_size)
+    print(f"bit: {binary_cipher_text_read_from_file}\nlength: {len(binary_cipher_text_read_from_file)}")
+
+    #Decrypt
+    message = elgamalDecrypt(u=key.u, p=key.p, binary_cipher_text=binary_cipher_text_read_from_file)
+    FileOutput.writeBinaryToFile(binary_data=message, output_file_path=output_file_path)
 
 
 def paddingBit(bit, block_size):
