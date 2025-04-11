@@ -4,9 +4,10 @@ from . import Padding
 
 def writeBinaryToFile(binary_data, output_file_path):
     with open(output_file_path, 'wb') as file:
-        binary_data = ConvertDataType.BinaryToB(binary_string=binary_data)
+        number = ConvertDataType.BinaryToInt(binary_string=binary_data)
+        byte = ConvertDataType.intTobyte(number=number)
 
-        file.write(binary_data)
+        file.write(byte)
 
 
 def writeBinaryToFileHandlePostPadding(binary_data, output_file_path):
