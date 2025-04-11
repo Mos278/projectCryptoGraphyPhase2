@@ -72,7 +72,7 @@ def convertToOdd(temp_result, max_value):
 
 def findMaxPrimeBeforeOverflow():
     max_prime = 0
-    for i in range(3, 2 ** 63, 2):  # Loop through odd numbers
+    for i in range(3, 2 ** 63, 2):
         state = isPrime(i)
         if state == STATE_PRIME.PRIME:
             max_prime = i
