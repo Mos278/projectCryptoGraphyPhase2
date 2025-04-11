@@ -23,3 +23,11 @@ def writeBinaryToFileHandlePostPadding(binary_data, output_file_path):
         binary_data = ConvertDataType.intTobyte(binary_data)
 
         file.write(binary_data)
+
+
+def saveKeyTofile(key, public_key_path, private_key_path):
+    with open(public_key_path, 'w') as file:
+        file.write(str(key.p)+','+str(key.g)+','+str(key.y))
+
+    with open(private_key_path, 'w') as file:
+        file.write(str(key.p)+','+str(key.u))
