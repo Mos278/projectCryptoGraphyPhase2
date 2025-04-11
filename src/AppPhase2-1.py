@@ -7,6 +7,7 @@ from module import FileInput
 from module import Generator
 from module import FileOutput
 from module import ConvertDataType
+from module import Padding
 from model import ElgamalKey
 
 import random
@@ -51,7 +52,7 @@ def ElgamalEncrypt(p, g, y, binary_file):
         # คำนวณค่า a
         a = Exponentiation.fastExpoWithModulo(base=g, expo=k, mod=p)
         print(f"A before padding: {a} : {ConvertDataType.intToBinary(a)} ")
-        a = paddingBit(ConvertDataType.intToBinary(a), block_size)
+        a = Padding.paddingBit(ConvertDataType.intToBinary(a), block_size)
         print(f"A after padding: {ConvertDataType.BinaryToInt(a)} : {a} ")
 
         ciphertext += a
@@ -59,7 +60,7 @@ def ElgamalEncrypt(p, g, y, binary_file):
         # คำนวณ b
         b = (Exponentiation.fastExpoWithModulo(base=y, expo=k, mod=p) * message) % p
         print(f"B before padding: {b} : {ConvertDataType.intToBinary(b)} ")
-        b = paddingBit(ConvertDataType.intToBinary(b), block_size)
+        b = Padding.paddingBit(ConvertDataType.intToBinary(b), block_size)
         print(f"B after padding: {ConvertDataType.BinaryToInt(b)} : {b} ")
 
         print("----------------------------------------")
@@ -89,7 +90,7 @@ def elgamalDecrypt(u, p, binary_cipher_text):
         s = Exponentiation.fastExpoWithModulo(a, u, p)
         temp_message = (b * GCD.findInverse(s, p)) % p
         temp_message = ConvertDataType.intToBinary(temp_message)
-        temp_message = paddingBit(temp_message, message_size)
+        temp_message = Padding.paddingBit(temp_message, message_size)
         print(f"message: {temp_message}")
         message += temp_message
 
@@ -107,7 +108,7 @@ def elgamalDecrypt(u, p, binary_cipher_text):
     temp_message = ConvertDataType.intToBinary(temp_message)
     missingBits = 8 - ((len(message) + len(temp_message)) % 8)
     if missingBits < 8:
-        temp_message = paddingToSize(temp_message, missingBits)
+        temp_message = Padding.paddingToSizeForward(temp_message, missingBits)
     print(f"message: {temp_message}")
     message += temp_message
 
@@ -129,35 +130,13 @@ def main():
     binary_input_file = FileInput.readBinaryFromFile(input_file_name=input_file_path)
     print(f"input length: {len(binary_input_file)}")
     cipher_text = ElgamalEncrypt(p=key.p, g=key.g, y=key.y, binary_file=binary_input_file)
-    FileOutput.writeBinaryToFile(binary_data=cipher_text, output_file_path=cipher_file_path)
-
-    #pre-Decrypt
-    binary_cipher_text_read_from_file = FileInput.readBinaryFromFile(input_file_name=cipher_file_path)
-    print(f"binary from file cipher : {binary_cipher_text_read_from_file}")
-
-    # Byte conversion padding removal
-    binary_cipher_text_read_from_file = removePadding(bit=binary_cipher_text_read_from_file, block_size=bit_size)
-    print(f"bit: {binary_cipher_text_read_from_file}\nlength: {len(binary_cipher_text_read_from_file)}")
+    FileOutput.writeBinaryToFileHandlePostPadding(binary_data=cipher_text, output_file_path=cipher_file_path)
 
     #Decrypt
+    binary_cipher_text_read_from_file = FileInput.readBinaryFromFileHandlePostPadding(input_file_name=cipher_file_path,
+                                                                                      block_size=bit_size)
     message = elgamalDecrypt(u=key.u, p=key.p, binary_cipher_text=binary_cipher_text_read_from_file)
     FileOutput.writeBinaryToFile(binary_data=message, output_file_path=output_file_path)
-
-
-def paddingBit(bit, block_size):
-    while len(bit) < block_size:
-        bit = '0' + bit
-    return bit
-
-
-def paddingToSize(bit, size):
-    for i in range(size):
-        bit = '0' + bit
-    return bit
-
-
-def removePadding(bit, block_size):
-    return bit[len(bit) % block_size:]
 
 
 if __name__ == "__main__":
