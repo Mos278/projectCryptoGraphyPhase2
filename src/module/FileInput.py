@@ -1,6 +1,8 @@
 import os
 from . import ConvertDataType
 from . import Padding
+from src.model import PublicKey
+from src.model import PrivateKey
 
 
 def randomNBitFromFile(bit_size, file_name):
@@ -59,3 +61,19 @@ def readBinaryFromFileHandlePostPadding(input_file_name, block_size):
     print(f"remove padding -> binary Data: {binary_data}\nlength: {len(binary_data)}")
 
     return binary_data
+
+
+def readPublicKeyFromFile(public_key_path):
+    with open(public_key_path, 'r') as file:
+        data = file.read()
+
+    temp = [int(x) for x in data.split(',')]
+    return PublicKey.PublicKey(p=temp[0], g=temp[1], y=temp[2])
+
+
+def readPrivateKeyFromFile(private_key_path):
+    with open(private_key_path, 'r') as file:
+        data = file.read()
+
+    temp = [int(x) for x in data.split(',')]
+    return PrivateKey.PrivateKey(p=temp[0], u=temp[1])
