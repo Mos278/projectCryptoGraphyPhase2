@@ -19,14 +19,14 @@ def main():
     private_key_path = config['private_key']['path']
 
     #Set Up
-    key = Elgamal.ElgamalKeyGen(bit_size=bit_size, random_file=random_file_path)
+    key = Elgamal.elgamalKeyGen(bit_size=bit_size, random_file=random_file_path)
     FileOutput.saveKeyTofile(key=key, public_key_path=public_key_path, private_key_path=private_key_path)
 
     #Encrypt
     public_key = FileInput.readPublicKeyFromFile(public_key_path=public_key_path)
     binary_input_file = FileInput.readBinaryFromFile(input_file_name=input_file_path)
     print(f"input length: {len(binary_input_file)}")
-    cipher_text = Elgamal.ElgamalEncrypt(p=public_key.p, g=public_key.g, y=public_key.y, binary_file=binary_input_file)
+    cipher_text = Elgamal.elgamalEncrypt(p=public_key.p, g=public_key.g, y=public_key.y, binary_file=binary_input_file)
     FileOutput.writeBinaryToFileHandlePostPadding(binary_data=cipher_text, output_file_path=cipher_file_path)
 
     #Decrypt

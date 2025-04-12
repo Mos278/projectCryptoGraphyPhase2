@@ -20,7 +20,7 @@ def genSafePrime(bit_size, file_name):
     return result
 
 
-def ElgamalKeyGen(bit_size, random_file):
+def elgamalKeyGen(bit_size, random_file):
     p = genSafePrime(bit_size, random_file)
     g = Generator.findGenerator(p)
     u = random.randint(1, p - 1)
@@ -30,7 +30,7 @@ def ElgamalKeyGen(bit_size, random_file):
     return ElgamalKey.ElgamalKey(p=p, g=g, y=y, u=u)
 
 
-def ElgamalEncrypt(p, g, y, binary_file):
+def elgamalEncrypt(p, g, y, binary_file):
     block_size = len(ConvertDataType.intToBinary(p))
     message_size = block_size - 1
     ciphertext = ""
@@ -49,7 +49,7 @@ def ElgamalEncrypt(p, g, y, binary_file):
         a = Exponentiation.fastExpoWithModulo(base=g, expo=k, mod=p)
         print(f"A before padding: {a} : {ConvertDataType.intToBinary(a)} ")
         a = Padding.paddingBit(ConvertDataType.intToBinary(a), block_size)
-        print(f"A after padding: {ConvertDataType.BinaryToInt(a)} : {a} ")
+        print(f"A after padding: {ConvertDataType.binaryToInt(a)} : {a} ")
 
         ciphertext += a
 
@@ -57,7 +57,7 @@ def ElgamalEncrypt(p, g, y, binary_file):
         b = (Exponentiation.fastExpoWithModulo(base=y, expo=k, mod=p) * message) % p
         print(f"B before padding: {b} : {ConvertDataType.intToBinary(b)} ")
         b = Padding.paddingBit(ConvertDataType.intToBinary(b), block_size)
-        print(f"B after padding: {ConvertDataType.BinaryToInt(b)} : {b} ")
+        print(f"B after padding: {ConvertDataType.binaryToInt(b)} : {b} ")
 
         print("----------------------------------------")
         ciphertext += b
@@ -78,8 +78,8 @@ def elgamalDecrypt(u, p, binary_cipher_text):
         a = bit[:block_size]
         b = bit[block_size:]
 
-        a = ConvertDataType.BinaryToInt(a)
-        b = ConvertDataType.BinaryToInt(b)
+        a = ConvertDataType.binaryToInt(a)
+        b = ConvertDataType.binaryToInt(b)
         print(f"A : {a} : {ConvertDataType.intToBinary(a)} ")
         print(f"B : {b} : {ConvertDataType.intToBinary(b)} ")
 
@@ -94,17 +94,17 @@ def elgamalDecrypt(u, p, binary_cipher_text):
     a = bit[:block_size]
     b = bit[block_size:]
 
-    a = ConvertDataType.BinaryToInt(a)
-    b = ConvertDataType.BinaryToInt(b)
+    a = ConvertDataType.binaryToInt(a)
+    b = ConvertDataType.binaryToInt(b)
     print(f"A : {a} : {ConvertDataType.intToBinary(a)} ")
     print(f"B : {b} : {ConvertDataType.intToBinary(b)} ")
 
     s = Exponentiation.fastExpoWithModulo(a, u, p)
     temp_message = (b * GCD.findInverse(s, p)) % p
     temp_message = ConvertDataType.intToBinary(temp_message)
-    missingBits = 8 - ((len(message) + len(temp_message)) % 8)
-    if missingBits < 8:
-        temp_message = Padding.paddingToSizeForward(temp_message, missingBits)
+    missing_bits = 8 - ((len(message) + len(temp_message)) % 8)
+    if missing_bits < 8:
+        temp_message = Padding.paddingToSizeForward(temp_message, missing_bits)
     print(f"message: {temp_message}")
     message += temp_message
 

@@ -2,7 +2,7 @@ def intToBinary(number):
     return bin(number)[2:]
 
 
-def BinaryToInt(binary_string):
+def binaryToInt(binary_string):
     return int(binary_string, 2)
 
 
