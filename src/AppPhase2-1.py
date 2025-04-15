@@ -26,7 +26,7 @@ def main():
     public_key = FileInput.readPublicKeyFromFile(public_key_path=public_key_path)
     binary_input_file = FileInput.readBinaryFromFile(input_file_name=input_file_path)
     print(f"input length: {len(binary_input_file)}")
-    cipher_text = Elgamal.elgamalEncrypt(p=public_key.p, g=public_key.g, y=public_key.y, binary_file=binary_input_file)
+    cipher_text = Elgamal.elgamalEncrypt(p=public_key.p, g=public_key.g, y=public_key.y, binary_data=binary_input_file)
     FileOutput.writeBinaryToFileHandlePostPadding(binary_data=cipher_text, output_file_path=cipher_file_path)
 
     #Decrypt
