@@ -17,12 +17,11 @@ def main():
     public_key_path = config['public_key']['path']
     private_key_path = config['private_key']['path']
 
-    #Set Up
+    # Set Up
     key = Elgamal.elgamalKeyGen(bit_size=bit_size, random_file=random_file_path)
     FileOutput.saveKeyTofile(key=key, public_key_path=public_key_path, private_key_path=private_key_path)
 
-
-    #Encrypt
+    # Encrypt
     public_key = FileInput.readPublicKeyFromFile(public_key_path=public_key_path)
     private_key = FileInput.readPrivateKeyFromFile(private_key_path=private_key_path)
 
@@ -30,19 +29,19 @@ def main():
     print(f"input length: {len(binary_input_file)}")
     cipher_text = Elgamal.elgamalEncrypt(p=public_key.p, g=public_key.g, y=public_key.y, binary_data=binary_input_file)
 
-    # sign_cipher_text = Elgamal.elgamalSignature(binary_data=cipher_text, p=public_key.p, g=public_key.g,
-    #                                             private_key=private_key.u)
-
-    sign_cipher_text = Elgamal.elgamalSignature(binary_data=cipher_text, p=public_key.p, g=public_key.g, u=private_key.u)
+    sign_cipher_text = Elgamal.elgamalSignature(binary_data=cipher_text, p=public_key.p, g=public_key.g,
+                                                u=private_key.u)
 
     FileOutput.writeBinaryToFileHandlePostPadding(binary_data=sign_cipher_text, output_file_path=cipher_file_path)
 
-    #Decrypt
-    binary_sign_cipher_text_read_from_file = FileInput.readBinaryFromFileHandlePostPadding(input_file_name=cipher_file_path,
-                                                                                      block_size=bit_size)
+    # Decrypt
 
-    verify, binary_cipher_text_read_from_file = Elgamal.elgamalVerification(sign_cipher_text=binary_sign_cipher_text_read_from_file, p=public_key.p, g=public_key.g,
-                                    public_key=public_key.y)
+    binary_sign_cipher_text_read_from_file = FileInput.readBinaryFromFileHandlePostPadding(
+        input_file_name=cipher_file_path, block_size=bit_size)
+
+    verify, binary_cipher_text_read_from_file = Elgamal.elgamalVerification(
+        sign_cipher_text=binary_sign_cipher_text_read_from_file, p=public_key.p, g=public_key.g,
+        public_key=public_key.y)
 
     message = Elgamal.elgamalDecrypt(u=private_key.u, p=private_key.p,
                                      binary_cipher_text=binary_cipher_text_read_from_file)
@@ -52,4 +51,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main()  # encrypt - sign cipher text and decrypt - verify signature
