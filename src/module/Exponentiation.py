@@ -21,8 +21,6 @@ def fastExpoWithModulo(base, expo, mod):
     while b > 0:
         if (b & 1) > 0:
             result = (result * a) % mod
-            if result <= 0:
-                return -99  # overflow
         b >>= 1
         a = (a * a) % mod
     return (result + mod) % mod

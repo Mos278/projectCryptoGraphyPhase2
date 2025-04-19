@@ -22,15 +22,20 @@ def main():
     key = Elgamal.elgamalKeyGen(bit_size=bit_size, random_file=random_file_path)
     FileOutput.saveKeyTofile(key=key, public_key_path=public_key_path, private_key_path=private_key_path)
 
-    # Encrypt
+
+    # get Key
+    private_key = FileInput.readPrivateKeyFromFile(private_key_path=private_key_path)
     public_key = FileInput.readPublicKeyFromFile(public_key_path=public_key_path)
+
+
+    # Encrypt
     binary_input_file = FileInput.readBinaryFromFile(input_file_name=input_file_path)
     print(f"input length: {len(binary_input_file)}")
     cipher_text = Elgamal.elgamalEncrypt(p=public_key.p, g=public_key.g, y=public_key.y, binary_data=binary_input_file)
     FileOutput.writeBinaryToFileHandlePostPadding(binary_data=cipher_text, output_file_path=cipher_file_path)
 
+
     # Decrypt
-    private_key = FileInput.readPrivateKeyFromFile(private_key_path=private_key_path)
     binary_cipher_text_read_from_file = FileInput.readBinaryFromFileHandlePostPadding(input_file_name=cipher_file_path,
                                                                                       block_size=bit_size)
     message = Elgamal.elgamalDecrypt(u=private_key.u, p=private_key.p,

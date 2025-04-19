@@ -141,7 +141,7 @@ def elgamalSignature(binary_data, p, g, u):
     return binary_data
 
 
-def elgamalVerification(sign_cipher_text, p, g, public_key):
+def elgamalVerification(sign_cipher_text, p, g, y):
     print(f"----------------------------------------Start verify----------------------------------------")
     binary_sign, binary_data = splitSignAndDataCipherText(binary_data=sign_cipher_text, p=p)
     block_size = len(binary_sign) // 2
@@ -152,8 +152,9 @@ def elgamalVerification(sign_cipher_text, p, g, public_key):
     hash_data = HashFunction.rwHash(binary_data=binary_data, p=p)
     hash_data_int = int(hash_data, 16)
     if not (0 < r < p and 0 < s < p - 1):
+        print("cipher text is non valid")
         return False
-    a = (Exponentiation.fastExpoWithModulo(base=public_key, expo=r, mod=p) * Exponentiation.fastExpoWithModulo(
+    a = (Exponentiation.fastExpoWithModulo(base=y, expo=r, mod=p) * Exponentiation.fastExpoWithModulo(
         base=r, expo=s, mod=p)) % p
     b = Exponentiation.fastExpoWithModulo(base=g, expo=hash_data_int, mod=p)
 
