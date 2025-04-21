@@ -2,6 +2,7 @@ from module import FileInput
 from module import FileOutput
 from module import Elgamal
 from module import HashFunction
+from module import ConvertDataType
 import configparser
 
 config = configparser.ConfigParser()
@@ -31,25 +32,25 @@ def main():
     # Encrypt
     binary_input_file = FileInput.readBinaryFromFile(input_file_name=input_file_path)
     print(f"input length: {len(binary_input_file)}")
-    cipher_text = Elgamal.elgamalEncrypt(p=public_key_receiver.p, g=public_key_receiver.g, y=public_key_receiver.y,
-                                         binary_data=binary_input_file)
+    sign_message_text = Elgamal.elgamalSignature(binary_data=binary_input_file, p=public_key.p,
+                                                 g=public_key.g, u=private_key.u)
 
-    sign_cipher_text = Elgamal.elgamalSignature(binary_data=cipher_text, p=public_key.p, g=public_key.g,
-                                                u=private_key.u)
+    sign_cipher_text = Elgamal.elgamalEncrypt(p=public_key_receiver.p, g=public_key_receiver.g,
+                                              y=public_key_receiver.y, binary_data=sign_message_text)
 
     FileOutput.writeBinaryToFileHandlePostPadding(binary_data=sign_cipher_text, output_file_path=cipher_file_path)
 
 
     # Decrypt
     binary_sign_cipher_text_read_from_file = FileInput.readBinaryFromFileHandlePostPadding(
-        input_file_name=cipher_file_path, block_size=bit_size)
+        input_file_name=cipher_file_path, block_size=len(ConvertDataType.intToBinary(public_key.p)))
 
-    verify, binary_cipher_text_read_from_file = Elgamal.elgamalVerification(
-        sign_cipher_text=binary_sign_cipher_text_read_from_file, p=public_key_receiver.p, g=public_key_receiver.g,
+    sign_message_text = Elgamal.elgamalDecrypt(u=private_key.u, p=public_key.p,
+                                     binary_cipher_text=binary_sign_cipher_text_read_from_file)
+
+    verify, message = Elgamal.elgamalVerification(
+        sign_text=sign_message_text, p=public_key_receiver.p, g=public_key_receiver.g,
         y=public_key_receiver.y)
-
-    message = Elgamal.elgamalDecrypt(u=private_key.u, p=public_key.p,
-                                     binary_cipher_text=binary_cipher_text_read_from_file)
 
     FileOutput.writeBinaryToFile(binary_data=message, output_file_path=output_file_path)
     print(f"Verify Signature: {verify}")
