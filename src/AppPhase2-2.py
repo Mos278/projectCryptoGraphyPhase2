@@ -48,7 +48,7 @@ def main():
         sign_cipher_text=binary_sign_cipher_text_read_from_file, p=public_key_receiver.p, g=public_key_receiver.g,
         y=public_key_receiver.y)
 
-    message = Elgamal.elgamalDecrypt(u=private_key.u, p=private_key.p,
+    message = Elgamal.elgamalDecrypt(u=private_key.u, p=public_key.p,
                                      binary_cipher_text=binary_cipher_text_read_from_file)
 
     FileOutput.writeBinaryToFile(binary_data=message, output_file_path=output_file_path)
