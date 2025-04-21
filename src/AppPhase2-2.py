@@ -15,6 +15,7 @@ def main():
     cipher_file_path = config['cipher_file']['path']
     output_file_path = config['output_file']['path']
     public_key_path = config['public_key']['path']
+    public_key_receiver_path = config['public_key_receiver']['path']
     private_key_path = config['private_key']['path']
 
     # Set Up
@@ -23,13 +24,15 @@ def main():
 
     # get Key
     public_key = FileInput.readPublicKeyFromFile(public_key_path=public_key_path)
+    public_key_receiver = FileInput.readPublicKeyFromFile(public_key_path=public_key_receiver_path)
     private_key = FileInput.readPrivateKeyFromFile(private_key_path=private_key_path)
 
 
     # Encrypt
     binary_input_file = FileInput.readBinaryFromFile(input_file_name=input_file_path)
     print(f"input length: {len(binary_input_file)}")
-    cipher_text = Elgamal.elgamalEncrypt(p=public_key.p, g=public_key.g, y=public_key.y, binary_data=binary_input_file)
+    cipher_text = Elgamal.elgamalEncrypt(p=public_key_receiver.p, g=public_key_receiver.g, y=public_key_receiver.y,
+                                         binary_data=binary_input_file)
 
     sign_cipher_text = Elgamal.elgamalSignature(binary_data=cipher_text, p=public_key.p, g=public_key.g,
                                                 u=private_key.u)
@@ -42,8 +45,8 @@ def main():
         input_file_name=cipher_file_path, block_size=bit_size)
 
     verify, binary_cipher_text_read_from_file = Elgamal.elgamalVerification(
-        sign_cipher_text=binary_sign_cipher_text_read_from_file, p=public_key.p, g=public_key.g,
-        y=public_key.y)
+        sign_cipher_text=binary_sign_cipher_text_read_from_file, p=public_key_receiver.p, g=public_key_receiver.g,
+        y=public_key_receiver.y)
 
     message = Elgamal.elgamalDecrypt(u=private_key.u, p=private_key.p,
                                      binary_cipher_text=binary_cipher_text_read_from_file)

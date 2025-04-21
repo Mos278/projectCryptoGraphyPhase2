@@ -24,3 +24,7 @@ def binaryToStr(binary_string):
     binary_string = binary_string[:len(binary_string) - len(binary_string) % 8]
     chars = [chr(int(binary_string[i:i+8], 2)) for i in range(0, len(binary_string), 8)]
     return ''.join(chars)
+
+
+def decimalToHex(number):
+    return hex(number)

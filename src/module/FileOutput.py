@@ -10,6 +10,11 @@ def writeBinaryToFile(binary_data, output_file_path):
         file.write(byte)
 
 
+def writeStringToFile(binary_data, output_file_path):
+    with open(output_file_path, 'w') as file:
+        file.write(binary_data)
+
+
 def writeBinaryToFileHandlePostPadding(binary_data, output_file_path):
     print(f"write binary before padding : {binary_data}\nlength: {len(binary_data)}")
     missing_bits = 8 - (len(binary_data) % 8)  # Cypher file support
