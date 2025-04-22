@@ -49,6 +49,13 @@ def readBinaryFromFile(input_file_name):
     return binary_data
 
 
+def readStringFromFile(input_file_name):
+    with open(input_file_name, 'r') as file:
+        data = file.read()
+    print(f"read file -> Data: {data}")
+    return data
+
+
 def readBinaryFromFileHandlePostPadding(input_file_name, block_size):
 
     with open(input_file_name, 'rb') as file:
