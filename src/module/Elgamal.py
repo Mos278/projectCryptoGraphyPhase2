@@ -9,7 +9,9 @@ from . import FileOutput
 from . import ConvertDataType
 from . import Padding
 from . import HashFunction
+from . import RWHash
 from src.model import ElgamalKey
+
 
 import random
 
@@ -117,7 +119,8 @@ def elgamalDecrypt(u, p, binary_cipher_text):
 def elgamalSignature(binary_data, p, g, u):
     block_size = len(ConvertDataType.intToBinary(number=p))
     print(f"----------------------------------------Start Sign----------------------------------------")
-    hash_data = HashFunction.rwHash(binary_data=binary_data, p=p)
+    # hash_data = HashFunction.rwHash(binary_data=binary_data, p=p)
+    hash_data = RWHash.HWHash(message=binary_data, p=p)
     hash_data_int = int(hash_data, 16)
 
     while True:
@@ -135,7 +138,7 @@ def elgamalSignature(binary_data, p, g, u):
     s = Padding.paddingBit(bit=s, block_size=block_size)
 
     sign = r + s
-    missing_bits = 8 - (len(sign) % 8)  # Cypher file support
+    missing_bits = 8 - (len(sign) % 8)  # padding sign for
     if missing_bits < 8:
         sign = Padding.paddingToSizeBackward(sign, missing_bits)
     print(f"sign: {sign}\nlength: {len(sign)}")
@@ -153,9 +156,13 @@ def elgamalVerification(sign_text, p, g, y):
     r = ConvertDataType.binaryToInt(r)
     s = binary_sign[block_size:]
     s = ConvertDataType.binaryToInt(s)
-    hash_data = HashFunction.rwHash(binary_data=binary_data, p=p)
+    # hash_data = HashFunction.rwHash(binary_data=binary_data, p=p)
+    hash_data = RWHash.HWHash(message=binary_data, p=p)
     hash_data_int = int(hash_data, 16)
     if not (0 < r < p and 0 < s < p - 1):
+        print(f"p: {p}")
+        print(f"r: {r}")
+        print(f"s: {s}")
         print("cipher text is non valid")
         return False
     a = (Exponentiation.fastExpoWithModulo(base=y, expo=r, mod=p) * Exponentiation.fastExpoWithModulo(

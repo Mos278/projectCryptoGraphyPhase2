@@ -30,9 +30,14 @@ def writeBinaryToFileHandlePostPadding(binary_data, output_file_path):
         file.write(binary_data)
 
 
-def saveKeyTofile(key, public_key_path, private_key_path):
+def saveKeyTofile(key, public_key_path, private_key_path, public_key_receiver_path=None):
     with open(public_key_path, 'w') as file:
-        file.write(str(key.p)+','+str(key.g)+','+str(key.y))
+        file.write(f"{key.p},{key.g},{key.y}")
+
+    if public_key_receiver_path is not None:
+        with open(public_key_receiver_path, 'w') as file:  # self sender receiver
+            file.write(f"{key.p},{key.g},{key.y}")
 
     with open(private_key_path, 'w') as file:
-        file.write(str(key.p)+','+str(key.u))
+        file.write(f"{key.p},{key.u}")
+

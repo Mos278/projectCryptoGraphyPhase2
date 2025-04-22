@@ -28,7 +28,6 @@ def main():
     public_key_receiver = FileInput.readPublicKeyFromFile(public_key_path=public_key_receiver_path)
     private_key = FileInput.readPrivateKeyFromFile(private_key_path=private_key_path)
 
-
     # Encrypt
     binary_input_file = FileInput.readBinaryFromFile(input_file_name=input_file_path)
     print(f"input length: {len(binary_input_file)}")
@@ -40,13 +39,12 @@ def main():
 
     FileOutput.writeBinaryToFileHandlePostPadding(binary_data=sign_cipher_text, output_file_path=cipher_file_path)
 
-
     # Decrypt
     binary_sign_cipher_text_read_from_file = FileInput.readBinaryFromFileHandlePostPadding(
         input_file_name=cipher_file_path, block_size=len(ConvertDataType.intToBinary(public_key.p)))
 
     sign_message_text = Elgamal.elgamalDecrypt(u=private_key.u, p=public_key.p,
-                                     binary_cipher_text=binary_sign_cipher_text_read_from_file)
+                                               binary_cipher_text=binary_sign_cipher_text_read_from_file)
 
     verify, message = Elgamal.elgamalVerification(
         sign_text=sign_message_text, p=public_key_receiver.p, g=public_key_receiver.g,
