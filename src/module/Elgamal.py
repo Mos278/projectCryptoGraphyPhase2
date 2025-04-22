@@ -9,7 +9,9 @@ from . import FileOutput
 from . import ConvertDataType
 from . import Padding
 from . import HashFunction
+from . import RWHash
 from src.model import ElgamalKey
+
 
 import random
 
@@ -117,7 +119,8 @@ def elgamalDecrypt(u, p, binary_cipher_text):
 def elgamalSignature(binary_data, p, g, u):
     block_size = len(ConvertDataType.intToBinary(number=p))
     print(f"----------------------------------------Start Sign----------------------------------------")
-    hash_data = HashFunction.rwHash(binary_data=binary_data, p=p)
+    # hash_data = HashFunction.rwHash(binary_data=binary_data, p=p)
+    hash_data = RWHash.HWHash(message=binary_data, p=p)
     hash_data_int = int(hash_data, 16)
 
     while True:
@@ -128,30 +131,43 @@ def elgamalSignature(binary_data, p, g, u):
     r = Exponentiation.fastExpoWithModulo(base=g, expo=k, mod=p)
     k_inv = GCD.findInverse(k, p - 1)
     s = ((hash_data_int - u * r) * k_inv) % (p - 1)
+    print(f"before p: {p}")
+    print(f"before r: {r}")
+    print(f"before s: {s}")
     r = ConvertDataType.intToBinary(r)
     s = ConvertDataType.intToBinary(s)
+    print(f"before r: {r}")
+    print(f"before s: {s}")
 
     r = Padding.paddingBit(bit=r, block_size=block_size)
     s = Padding.paddingBit(bit=s, block_size=block_size)
 
-    result = r + s
-    binary_data += result
+    sign = r + s
+    missing_bits = 8 - (len(sign) % 8)  # padding sign for
+    if missing_bits < 8:
+        sign = Padding.paddingToSizeBackward(sign, missing_bits)
+    print(f"sign: {sign}\nlength: {len(sign)}")
+    binary_data += sign
     print(f"----------------------------------------End Sign----------------------------------------")
 
     return binary_data
 
 
-def elgamalVerification(sign_cipher_text, p, g, y):
+def elgamalVerification(sign_text, p, g, y):
     print(f"----------------------------------------Start verify----------------------------------------")
-    binary_sign, binary_data = splitSignAndDataCipherText(binary_data=sign_cipher_text, p=p)
+    binary_sign, binary_data = splitSignAndDataCipherText(binary_data=sign_text, p=p)
     block_size = len(binary_sign) // 2
     r = binary_sign[:block_size]
     r = ConvertDataType.binaryToInt(r)
     s = binary_sign[block_size:]
     s = ConvertDataType.binaryToInt(s)
-    hash_data = HashFunction.rwHash(binary_data=binary_data, p=p)
+    # hash_data = HashFunction.rwHash(binary_data=binary_data, p=p)
+    hash_data = RWHash.HWHash(message=binary_data, p=p)
     hash_data_int = int(hash_data, 16)
     if not (0 < r < p and 0 < s < p - 1):
+        print(f"after p: {p}")
+        print(f"after r: {r}")
+        print(f"after s: {s}")
         print("cipher text is non valid")
         return False
     a = (Exponentiation.fastExpoWithModulo(base=y, expo=r, mod=p) * Exponentiation.fastExpoWithModulo(
@@ -173,6 +189,10 @@ def splitSignAndDataCipherText(binary_data, p):
     block_size = len(ConvertDataType.intToBinary(p))
     cipher_size = block_size * 2  # a + b
     last_block_position = len(binary_data) - cipher_size
+    padding_bits = (last_block_position % 8)  # remove padding sign
+    if padding_bits > 0:
+        binary_data = Padding.removePaddingToCountBackward(bit=binary_data, count=padding_bits)
+        last_block_position -= padding_bits
     sign = binary_data[last_block_position:]
     pure_data = binary_data[:last_block_position]
 
