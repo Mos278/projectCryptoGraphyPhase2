@@ -21,7 +21,9 @@ def main():
 
     # Set Up
     key = Elgamal.elgamalKeyGen(bit_size=bit_size, random_file=random_file_path)
-    FileOutput.saveKeyTofile(key=key, public_key_path=public_key_path, private_key_path=private_key_path)
+    FileOutput.saveKeyTofile(key=key, public_key_path=public_key_path,
+                             public_key_receiver_path=public_key_receiver_path,  # self sender, receiver
+                             private_key_path=private_key_path)
 
     # get Key
     public_key = FileInput.readPublicKeyFromFile(public_key_path=public_key_path)

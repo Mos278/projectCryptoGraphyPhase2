@@ -131,8 +131,13 @@ def elgamalSignature(binary_data, p, g, u):
     r = Exponentiation.fastExpoWithModulo(base=g, expo=k, mod=p)
     k_inv = GCD.findInverse(k, p - 1)
     s = ((hash_data_int - u * r) * k_inv) % (p - 1)
+    print(f"before p: {p}")
+    print(f"before r: {r}")
+    print(f"before s: {s}")
     r = ConvertDataType.intToBinary(r)
     s = ConvertDataType.intToBinary(s)
+    print(f"before r: {r}")
+    print(f"before s: {s}")
 
     r = Padding.paddingBit(bit=r, block_size=block_size)
     s = Padding.paddingBit(bit=s, block_size=block_size)
@@ -160,9 +165,9 @@ def elgamalVerification(sign_text, p, g, y):
     hash_data = RWHash.HWHash(message=binary_data, p=p)
     hash_data_int = int(hash_data, 16)
     if not (0 < r < p and 0 < s < p - 1):
-        print(f"p: {p}")
-        print(f"r: {r}")
-        print(f"s: {s}")
+        print(f"after p: {p}")
+        print(f"after r: {r}")
+        print(f"after s: {s}")
         print("cipher text is non valid")
         return False
     a = (Exponentiation.fastExpoWithModulo(base=y, expo=r, mod=p) * Exponentiation.fastExpoWithModulo(
