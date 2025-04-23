@@ -149,9 +149,9 @@ def elgamalSignature(binary_data, p, g, u):
     sign = r + s
     missing_bits = 8 - (len(sign) % 8)  # padding sign for
     if missing_bits < 8:
-        sign = Padding.paddingToSizeBackward(sign, missing_bits)
+        sign = Padding.paddingToSizeForward(sign, missing_bits)
     print(f"sign: {sign}\nlength: {len(sign)}")
-    binary_data += sign
+    binary_data = sign + binary_data
     print(f"----------------------------------------End Sign----------------------------------------")
 
     return binary_data
@@ -192,12 +192,11 @@ def elgamalVerification(sign_text, p, g, y):
 def splitSignAndDataCipherText(binary_data, p):
     block_size = len(ConvertDataType.intToBinary(p))
     cipher_size = block_size * 2  # a + b
-    last_block_position = len(binary_data) - cipher_size
-    padding_bits = (last_block_position % 8)  # remove padding sign
+    predict_message_length = len(binary_data) - cipher_size
+    padding_bits = (predict_message_length % 8)  # remove padding sign
     if padding_bits > 0:
-        binary_data = Padding.removePaddingToCountBackward(bit=binary_data, count=padding_bits)
-        last_block_position -= padding_bits
-    sign = binary_data[last_block_position:]
-    pure_data = binary_data[:last_block_position]
+        binary_data = Padding.removePaddingToCountForward(bit=binary_data, count=padding_bits)
+    sign = binary_data[:cipher_size]
+    pure_data = binary_data[cipher_size:]
 
     return sign, pure_data

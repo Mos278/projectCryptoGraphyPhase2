@@ -20,6 +20,10 @@ def removePaddingToCountBackward(bit, count):
     bit = bit[:len(bit) - count]
     return bit
 
+def removePaddingToCountForward(bit, count):
+    bit = bit[count:]
+    return bit
+
 
 def removePaddingForward(bit, block_size):
     return bit[len(bit) % block_size:]
