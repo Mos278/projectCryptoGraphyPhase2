@@ -44,9 +44,9 @@ def elgamalEncrypt(p, g, y, binary_data):
         message = int(bit, 2)
 
         # สุ่มค่า k และตรวจสอบว่า coprime กับ p-1
-        k = random.randint(2, p - 1)
+        k = random.randint(2, p - 2)
         while not GCD.isCoprime(base=k, mod=p - 1):
-            k = random.randint(2, p - 1)
+            k = random.randint(2, p - 2)
 
         print(f"k: {k}")
         # คำนวณค่า a
@@ -122,15 +122,19 @@ def elgamalSignature(binary_data, p, g, u):
     # hash_data = HashFunction.rwHash(binary_data=binary_data, p=p)
     hash_data = RWHash.HWHash(message=binary_data, p=p)
     hash_data_int = int(hash_data, 16)
+    r = 0  # init value
+    s = 0  # init value
 
-    while True:
-        k = random.randint(2, p - 2)
-        if GCD.findGCD(k, p - 1) == 1:
-            break
+    while s == 0:  # if s == 0 start over again
+        while True:
+            k = random.randint(2, p - 2)
+            if GCD.findGCD(k, p - 1) == 1:
+                break
 
-    r = Exponentiation.fastExpoWithModulo(base=g, expo=k, mod=p)
-    k_inv = GCD.findInverse(k, p - 1)
-    s = ((hash_data_int - u * r) * k_inv) % (p - 1)
+        r = Exponentiation.fastExpoWithModulo(base=g, expo=k, mod=p)
+        k_inv = GCD.findInverse(k, p - 1)
+        s = ((hash_data_int - (u * r)) * k_inv) % (p - 1)
+
     print(f"before p: {p}")
     print(f"before r: {r}")
     print(f"before s: {s}")

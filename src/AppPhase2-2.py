@@ -54,7 +54,19 @@ def main():
 
     FileOutput.writeBinaryToFile(binary_data=message, output_file_path=output_file_path)
     print(f"Verify Signature: {verify}")
+    return verify
 
 
 if __name__ == "__main__":
-    main()  # encrypt - sign cipher text and decrypt - verify signature
+    count = 0
+    try:
+        while main():
+            count += 1
+            print(f"count {count}")
+    except Exception as e:
+        print(f"Exception occurred: {e}")
+    finally:
+        print(f"Final count: {count}")
+    # main()
+
+

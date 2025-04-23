@@ -57,13 +57,13 @@ def readStringFromFile(input_file_name):
 
 
 def readBinaryFromFileHandlePostPadding(input_file_name, block_size):
-
     with open(input_file_name, 'rb') as file:
         data = file.read()
 
     binary_data = ConvertDataType.bytesToBinary(data)
 
     print(f"read file -> binary Data: {binary_data}\nlength: {len(binary_data)}")
+    binary_data = binary_data[1:]
     binary_data = Padding.removePaddingBackward(bit=binary_data, block_size=block_size)
     print(f"remove padding -> binary Data: {binary_data}\nlength: {len(binary_data)}")
 

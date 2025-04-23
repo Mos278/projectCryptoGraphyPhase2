@@ -43,7 +43,18 @@ def main():
     message = Elgamal.elgamalDecrypt(u=private_key.u, p=private_key.p,
                                      binary_cipher_text=binary_cipher_text_read_from_file)
     FileOutput.writeBinaryToFile(binary_data=message, output_file_path=output_file_path)
+    return message == binary_input_file
 
 
 if __name__ == "__main__":
-    main()  # encrypt and decrypt
+    count = 0
+    try:
+        while main():
+            count += 1
+            print(f"count {count}")
+    except Exception as e:
+        print(f"Exception occurred: {e}")
+    finally:
+        print(f"Final count: {count}")
+    # main()
+
