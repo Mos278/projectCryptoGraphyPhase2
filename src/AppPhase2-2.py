@@ -58,15 +58,15 @@ def main():
 
 
 if __name__ == "__main__":
-    count = 0
-    try:
-        while main():
-            count += 1
-            print(f"count {count}")
-    except Exception as e:
-        print(f"Exception occurred: {e}")
-    finally:
-        print(f"Final count: {count}")
-    # main()
+    # count = 0
+    # try:
+    #     while main():
+    #         count += 1
+    #         print(f"count {count}")
+    # except Exception as e:
+    #     print(f"Exception occurred: {e}")
+    # finally:
+    #     print(f"Final count: {count}")
+    main()
 
 
