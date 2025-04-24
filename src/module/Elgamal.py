@@ -12,7 +12,6 @@ from . import HashFunction
 from . import RWHash
 from src.model import ElgamalKey
 
-
 import random
 
 
@@ -151,15 +150,13 @@ def elgamalSignature(binary_data, p, g, u):
     if missing_bits < 8:
         sign = Padding.paddingToSizeForward(sign, missing_bits)
     print(f"sign: {sign}\nlength: {len(sign)}")
-    binary_data = sign + binary_data
     print(f"----------------------------------------End Sign----------------------------------------")
 
-    return binary_data
+    return sign
 
 
-def elgamalVerification(sign_text, p, g, y):
+def elgamalVerification(binary_sign, binary_data, p, g, y):
     print(f"----------------------------------------Start verify----------------------------------------")
-    binary_sign, binary_data = splitSignAndDataCipherText(binary_data=sign_text, p=p)
     block_size = len(binary_sign) // 2
     r = binary_sign[:block_size]
     r = ConvertDataType.binaryToInt(r)
@@ -186,17 +183,24 @@ def elgamalVerification(sign_text, p, g, y):
         print(f"Verification is wrong")
     print(f"----------------------------------------End verify----------------------------------------")
 
-    return result, binary_data
+    return result
 
 
 def splitSignAndDataCipherText(binary_data, p):
     block_size = len(ConvertDataType.intToBinary(p))
     cipher_size = block_size * 2  # a + b
-    predict_message_length = len(binary_data) - cipher_size
-    padding_bits = (predict_message_length % 8)  # remove padding sign
-    if padding_bits > 0:
-        binary_data = Padding.removePaddingToCountForward(bit=binary_data, count=padding_bits)
+    binary_data = removePaddingInSignature(binary_data=binary_data, p=p)
     sign = binary_data[:cipher_size]
     pure_data = binary_data[cipher_size:]
 
     return sign, pure_data
+
+
+def removePaddingInSignature(binary_data, p):
+    block_size = len(ConvertDataType.intToBinary(p))
+    cipher_size = block_size * 2  # a + b
+    predict_sign_length = len(binary_data) - cipher_size
+    padding_bits = (predict_sign_length % 8)  # remove padding sign
+    if padding_bits > 0:
+        binary_data = Padding.removePaddingToCountForward(bit=binary_data, count=padding_bits)
+    return binary_data

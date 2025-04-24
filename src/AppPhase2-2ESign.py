@@ -15,6 +15,7 @@ def main():
     input_file_path = config['input_file']['path']
     cipher_file_path = config['cipher_file']['path']
     output_file_path = config['output_file']['path']
+    signature_file_path = config['signature_file']['path']
     public_key_path = config['public_key']['path']
     public_key_receiver_path = config['public_key_receiver']['path']
     private_key_path = config['private_key']['path']
@@ -35,26 +36,38 @@ def main():
     print(f"input length: {len(binary_input_file)}")
     sign_text = Elgamal.elgamalSignature(binary_data=binary_input_file, p=public_key.p,
                                          g=public_key.g, u=private_key.u)
-    sign_message_text = sign_text + binary_input_file
 
-    sign_cipher_text = Elgamal.elgamalEncrypt(p=public_key_receiver.p, g=public_key_receiver.g,
-                                              y=public_key_receiver.y, binary_data=sign_message_text)
+    cipher_text = Elgamal.elgamalEncrypt(p=public_key_receiver.p, g=public_key_receiver.g,
+                                         y=public_key_receiver.y, binary_data=binary_input_file)
 
-    FileOutput.writeBinaryToFileHandlePostPadding(binary_data=sign_cipher_text, output_file_path=cipher_file_path)
+    sign_text = Elgamal.elgamalEncrypt(p=public_key_receiver.p, g=public_key_receiver.g,
+                                       y=public_key_receiver.y, binary_data=sign_text)
+
+    print(f"------------------write Cipher file------------------")
+    FileOutput.writeBinaryToFileHandlePostPadding(binary_data=cipher_text, output_file_path=cipher_file_path)
+    print(f"------------------write sign file------------------")
+    FileOutput.writeBinaryToFileHandlePostPadding(binary_data=sign_text, output_file_path=signature_file_path)
 
     # Decrypt
-    binary_sign_cipher_text_read_from_file = FileInput.readBinaryFromFileHandlePostPadding(
+    print(f"------------------read Cipher file------------------")
+    binary_cipher_text_read_from_file = FileInput.readBinaryFromFileHandlePostPadding(
         input_file_name=cipher_file_path, block_size=len(ConvertDataType.intToBinary(public_key.p)))
+    print(f"------------------read sign file------------------")
+    binary_sign_text_read_from_file = FileInput.readBinaryFromFileHandlePostPadding(
+        input_file_name=signature_file_path, block_size=len(ConvertDataType.intToBinary(public_key.p)))
 
-    sign_message_text = Elgamal.elgamalDecrypt(u=private_key.u, p=public_key.p,
-                                               binary_cipher_text=binary_sign_cipher_text_read_from_file)
+    message_text = Elgamal.elgamalDecrypt(u=private_key.u, p=public_key.p,
+                                          binary_cipher_text=binary_cipher_text_read_from_file)
 
-    sign, message = Elgamal.splitSignAndDataCipherText(binary_data=sign_message_text, p=public_key_receiver.p)
+    signature = Elgamal.elgamalDecrypt(u=private_key.u, p=public_key.p,
+                                       binary_cipher_text=binary_sign_text_read_from_file)
 
-    verify = Elgamal.elgamalVerification(binary_data=message, binary_sign=sign, p=public_key_receiver.p,
-                                         g=public_key_receiver.g,y=public_key_receiver.y)
+    signature = Elgamal.removePaddingInSignature(binary_data=signature, p=public_key_receiver.p)
 
-    FileOutput.writeBinaryToFile(binary_data=message, output_file_path=output_file_path)
+    verify = Elgamal.elgamalVerification(binary_data=message_text, binary_sign=signature,
+                                         p=public_key_receiver.p, g=public_key_receiver.g, y=public_key_receiver.y)
+
+    FileOutput.writeBinaryToFile(binary_data=message_text, output_file_path=output_file_path)
     print(f"Verify Signature: {verify}")
     return verify
 
